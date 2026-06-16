@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>公众号写作助手</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">✍️ 公众号写作助手</div>
+    <div class="actions">
+      <select id="keywordFilter" title="按话题筛选">
+        <option value="">全部话题</option>
+      </select>
+      <button id="schedListBtn" class="btn">🕒 排期列表</button>
+      <button id="refreshBtn" class="btn primary">🔥 更新热点</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- 左：热点列表 -->
+    <section class="panel list-panel">
+      <div class="panel-title">今日热点 <span id="listCount" class="muted"></span></div>
+      <div id="postList" class="post-list">
+        <div class="empty">点击右上角「更新热点」抓取文章</div>
+      </div>
+    </section>
+
+    <!-- 右：详情 + 改写 -->
+    <section class="panel work-panel">
+      <div id="workEmpty" class="empty big">← 从左侧选择一篇文章开始改写</div>
+
+      <div id="workArea" class="work-area hidden">
+        <div class="orig">
+          <div class="orig-head">
+            <h2 id="origTitle"></h2>
+            <div class="meta">
+              <span id="origAccount"></span>
+              <span id="origHotness" class="badge"></span>
+              <a id="origLink" href="#" target="_blank" rel="noopener" class="muted">查看原文 ↗</a>
+            </div>
+          </div>
+          <div id="origContent" class="orig-content"></div>
+        </div>
+
+        <div class="rewrite-controls">
+          <label>改写风格
+            <select id="styleSelect">
+              <option value="default">默认 · 大众通顺</option>
+              <option value="formal">正式 · 专业深度</option>
+              <option value="lively">活泼 · 有网感</option>
+              <option value="story">故事 · 场景代入</option>
+              <option value="xiaohongshu">小红书风</option>
+            </select>
+          </label>
+          <input id="extraInput" type="text" placeholder="额外要求（可选），如：控制在 800 字、面向宝妈群体" />
+          <button id="rewriteBtn" class="btn primary">✨ 开始改写</button>
+        </div>
+
+        <div id="rewriteResult" class="rewrite-result hidden">
+          <div class="result-head">
+            <div class="orig-badge" id="origScore"></div>
+            <div class="result-actions">
+              <button id="coverBtn" class="btn">🖼️ 生成封面</button>
+              <button id="copyBtn" class="btn">📋 复制全文</button>
+              <button id="schedBtn" class="btn">🕒 定时发布</button>
+              <button id="draftBtn" class="btn primary">📤 存公众号草稿</button>
+            </div>
+          </div>
+          <div id="schedForm" class="sched-form hidden">
+            <label>发布时间
+              <input id="schedTime" type="datetime-local" />
+            </label>
+            <label>动作
+              <select id="schedAction">
+                <option value="draft">到点存草稿（安全，需手动群发）</option>
+                <option value="publish">到点自动发表</option>
+              </select>
+            </label>
+            <button id="schedConfirm" class="btn primary">确认排期</button>
+            <span class="sched-note">提前排好多篇、设好时间，系统到点自动执行。</span>
+          </div>
+
+          <div id="coverBox" class="cover-box hidden">
+            <img id="coverImg" alt="封面预览" />
+          </div>
+
+          <h3 id="rwTitle" contenteditable="true" class="editable"></h3>
+          <div id="titleOptions" class="title-options"></div>
+
+          <div id="rwContent" contenteditable="true" class="editable rw-content"></div>
+
+          <div class="moderation">
+            <div class="moderation-head">
+              <span id="modBadge" class="mod-badge"></span>
+              <button id="recheckBtn" class="btn small">🔍 重新检测</button>
+            </div>
+            <div id="modHits" class="mod-hits"></div>
+          </div>
+
+          <p class="tip">提示：内容可直接编辑，编辑后可「重新检测」违规词。确认无误后复制或存草稿。原创度/合规检测仅供参考。</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 排期列表 -->
+  <div id="schedOverlay" class="overlay hidden">
+    <div class="overlay-box">
+      <div class="overlay-head">
+        <span>🕒 定时发布排期</span>
+        <button id="schedClose" class="btn small">关闭</button>
+      </div>
+      <div id="schedList" class="sched-list"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
