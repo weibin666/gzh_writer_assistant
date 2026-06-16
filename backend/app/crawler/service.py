@@ -40,14 +40,21 @@ def _to_model(raw: RawPost) -> HotPost:
         keyword=raw.keyword,
         source=raw.source,
         hotness=raw.hotness,
+        likes=raw.likes,
+        shares=raw.shares,
+        favorites=raw.favorites,
+        comments=raw.comments,
         published_at=raw.published_at,
         fingerprint=raw.fingerprint(),
     )
 
 
-def refresh_hot_posts(db: Session) -> dict:
-    """抓取一轮热点并写入数据库，返回统计信息。"""
-    keywords = settings.keywords
+def refresh_hot_posts(db: Session, keywords: list[str] | None = None) -> dict:
+    """抓取一轮热点并写入数据库，返回统计信息。
+
+    keywords 为空时使用配置里的默认领域；传入则按指定领域抓取。
+    """
+    keywords = [k.strip() for k in (keywords or []) if k.strip()] or settings.keywords
     primary = _build_primary_source()
     raw_posts = primary.fetch(keywords)
     used_source = primary.name
@@ -70,9 +77,13 @@ def refresh_hot_posts(db: Session) -> dict:
     for fp, rp in dedup.items():
         exists = db.query(HotPost).filter(HotPost.fingerprint == fp).first()
         if exists:
-            # 已存在则更新热度（取较高值），不重复插入
+            # 已存在则更新热度（取较高值）与互动数据，不重复插入
             if rp.hotness > exists.hotness:
                 exists.hotness = rp.hotness
+            for attr in ("likes", "shares", "favorites", "comments"):
+                val = getattr(rp, attr)
+                if val is not None and val >= 0:
+                    setattr(exists, attr, val)
             continue
         db.add(_to_model(rp))
         new_count += 1

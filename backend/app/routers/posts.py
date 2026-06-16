@@ -1,21 +1,25 @@
 """热点文章相关接口。"""
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from ..crawler.service import refresh_hot_posts
 from ..database import get_db
 from ..models import HotPost
-from ..schemas import PostDetail, PostOut, RefreshResult
+from ..schemas import PostDetail, PostOut, RefreshRequest, RefreshResult
 
 router = APIRouter(prefix="/api/posts", tags=["posts"])
 
 
 @router.post("/refresh", response_model=RefreshResult)
-def refresh(db: Session = Depends(get_db)):
-    """抓取最新一轮热点文章。"""
-    result = refresh_hot_posts(db)
+def refresh(
+    body: Optional[RefreshRequest] = Body(default=None),
+    db: Session = Depends(get_db),
+):
+    """抓取最新一轮热点文章。可在 body.domains 指定要抓取的领域。"""
+    domains = body.domains if body else None
+    result = refresh_hot_posts(db, keywords=domains)
     return RefreshResult(**result)
 
 

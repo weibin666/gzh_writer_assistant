@@ -15,6 +15,10 @@ class PostOut(BaseModel):
     keyword: str
     source: str
     hotness: float
+    likes: int = -1
+    shares: int = -1
+    favorites: int = -1
+    comments: int = -1
     published_at: Optional[datetime]
     fetched_at: datetime
     rewrite_count: int = 0
@@ -24,6 +28,11 @@ class PostOut(BaseModel):
 
 class PostDetail(PostOut):
     content: str
+
+
+class RefreshRequest(BaseModel):
+    # 本次抓取要覆盖的领域 / 关键词；为空则用配置里的默认
+    domains: list[str] = []
 
 
 class RefreshResult(BaseModel):

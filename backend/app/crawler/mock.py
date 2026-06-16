@@ -95,6 +95,9 @@ class MockSource(BaseSource):
         now = datetime.utcnow()
         posts: list[RawPost] = []
         for i, item in enumerate(_SEED):
+            h = float(item["hotness"])
+            # 由热度派生一组示例互动数据，便于演示界面
+            likes = int(h * 120)
             posts.append(
                 RawPost(
                     title=item["title"],
@@ -104,7 +107,11 @@ class MockSource(BaseSource):
                     content=item["content"],
                     keyword=item["keyword"],
                     source=self.name,
-                    hotness=float(item["hotness"]),
+                    hotness=h,
+                    likes=likes,
+                    shares=int(likes * 0.35),
+                    favorites=int(likes * 0.5),
+                    comments=int(likes * 0.18),
                     published_at=now - timedelta(hours=i),
                 )
             )

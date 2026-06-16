@@ -29,7 +29,18 @@ _FIELD_MAP = {
     "summary": ["summary", "digest", "desc"],
     "likes": ["like_num", "likeCount", "zan", "like"],
     "reads": ["read_num", "readCount", "read"],
+    "shares": ["share_num", "shareCount", "forward", "zhuanfa"],
+    "favorites": ["fav_num", "favCount", "collect", "shoucang"],
+    "comments": ["comment_num", "commentCount", "comment", "pinglun"],
 }
+
+
+def _int(item: dict, keys: list[str], default: int = -1) -> int:
+    v = _pick(item, keys, None)
+    try:
+        return int(v) if v not in (None, "") else default
+    except (TypeError, ValueError):
+        return default
 
 
 def _pick(item: dict, keys: list[str], default=""):
@@ -78,10 +89,10 @@ class NewRankSource(BaseSource):
         for it in items:
             if not isinstance(it, dict):
                 continue
-            likes = float(_pick(it, _FIELD_MAP["likes"], 0) or 0)
-            reads = float(_pick(it, _FIELD_MAP["reads"], 0) or 0)
+            likes = _int(it, _FIELD_MAP["likes"], 0)
+            reads = _int(it, _FIELD_MAP["reads"], 0)
             # 真实热度：点赞为主，阅读为辅
-            hotness = likes + reads * 0.1
+            hotness = float(max(likes, 0)) + max(reads, 0) * 0.1
             results.append(
                 RawPost(
                     title=str(_pick(it, _FIELD_MAP["title"])),
@@ -91,8 +102,12 @@ class NewRankSource(BaseSource):
                     keyword="榜单",
                     source=self.name,
                     hotness=hotness,
+                    likes=likes,
+                    shares=_int(it, _FIELD_MAP["shares"]),
+                    favorites=_int(it, _FIELD_MAP["favorites"]),
+                    comments=_int(it, _FIELD_MAP["comments"]),
                     published_at=datetime.utcnow(),
-                    extra={"likes": likes, "reads": reads},
+                    extra={"reads": reads},
                 )
             )
         return results

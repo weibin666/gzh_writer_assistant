@@ -21,6 +21,11 @@ class HotPost(Base):
     keyword = Column(String(128), default="")          # 命中的关键词 / 话题
     source = Column(String(64), default="sogou")       # 数据源标识
     hotness = Column(Float, default=0.0)               # 热度启发式分（非真实点赞）
+    # 互动数据。-1 表示「该数据源无法提供」（如搜狗），前端显示为「—」
+    likes = Column(Integer, default=-1)                # 点赞量
+    shares = Column(Integer, default=-1)               # 转发量（微信不公开，通常 -1）
+    favorites = Column(Integer, default=-1)            # 收藏量（微信不公开，通常 -1）
+    comments = Column(Integer, default=-1)             # 评论量
     published_at = Column(DateTime, nullable=True)
     fetched_at = Column(DateTime, default=datetime.utcnow)
     # 用于去重的指纹（标题+账号归一化）

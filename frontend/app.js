@@ -3,6 +3,17 @@ let posts = [];
 let current = null;
 let currentRewrite = null;
 
+// 预设领域；用户也可自定义添加
+const PRESET_DOMAINS = ["AI", "人工智能", "情感", "养生", "职场", "科技", "财经", "教育", "健康", "美食"];
+let selectedDomains = new Set();
+
+// 数字格式化：>=1万 显示「x.x万」，-1/无数据显示「—」
+function fmtNum(n) {
+  if (n === undefined || n === null || n < 0) return "—";
+  if (n >= 10000) return (n / 10000).toFixed(1).replace(/\.0$/, "") + "万";
+  return String(n);
+}
+
 const $ = (id) => document.getElementById(id);
 
 function toast(msg, ms = 2200) {
@@ -48,6 +59,12 @@ function renderList() {
         <span class="tag">${escapeHtml(p.keyword || "热点")}</span>
         <span>${escapeHtml(p.account || "")}</span>
         ${p.rewrite_count ? `<span class="rw-count">✓ 已改写${p.rewrite_count}</span>` : ""}
+      </div>
+      <div class="metrics">
+        <span title="点赞量">👍 ${fmtNum(p.likes)}</span>
+        <span title="转发量">🔁 ${fmtNum(p.shares)}</span>
+        <span title="收藏量">⭐ ${fmtNum(p.favorites)}</span>
+        <span title="评论量">💬 ${fmtNum(p.comments)}</span>
       </div>
     </div>`
     )
@@ -315,13 +332,43 @@ async function pushDraft() {
   }
 }
 
+// ---- 领域选择 ----
+function renderDomainChips() {
+  const box = $("domainChips");
+  box.innerHTML = PRESET_DOMAINS.map(
+    (d) =>
+      `<span class="domain-chip ${selectedDomains.has(d) ? "active" : ""}" data-d="${escapeHtml(d)}">${escapeHtml(d)}</span>`
+  ).join("");
+  box.querySelectorAll(".domain-chip").forEach((el) =>
+    el.addEventListener("click", () => {
+      const d = el.dataset.d;
+      selectedDomains.has(d) ? selectedDomains.delete(d) : selectedDomains.add(d);
+      renderDomainChips();
+    })
+  );
+}
+
+function addCustomDomain(e) {
+  if (e.key !== "Enter") return;
+  const v = e.target.value.trim();
+  if (v) {
+    if (!PRESET_DOMAINS.includes(v)) PRESET_DOMAINS.push(v);
+    selectedDomains.add(v);
+    e.target.value = "";
+    renderDomainChips();
+  }
+}
+
 // ---- 更新热点 ----
 async function refresh() {
   const btn = $("refreshBtn");
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> 抓取中…';
   try {
-    const r = await api("/api/posts/refresh", { method: "POST" });
+    const r = await api("/api/posts/refresh", {
+      method: "POST",
+      body: JSON.stringify({ domains: [...selectedDomains] }),
+    });
     await loadPosts();
     refreshKeywordOptions();
     let msg = `✅ 抓取 ${r.fetched} 篇，新增 ${r.new} 篇`;
@@ -352,6 +399,9 @@ $("schedBtn").addEventListener("click", toggleSchedForm);
 $("schedConfirm").addEventListener("click", confirmSchedule);
 $("schedListBtn").addEventListener("click", openSchedList);
 $("schedClose").addEventListener("click", () => $("schedOverlay").classList.add("hidden"));
+$("customDomain").addEventListener("keydown", addCustomDomain);
+
+renderDomainChips();
 $("keywordFilter").addEventListener("change", loadPosts);
 
 loadPosts().then(refreshKeywordOptions).catch(() => {});

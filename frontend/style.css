@@ -57,6 +57,31 @@ select, input[type="text"] {
   color: var(--text);
 }
 
+/* 领域选择栏 */
+.domain-bar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 10px 24px; background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+.domain-label { font-size: 13px; color: var(--muted); font-weight: 600; }
+.domain-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.domain-chip {
+  font-size: 13px; padding: 4px 12px; border-radius: 14px;
+  background: #f0f1f3; color: #5b616e; border: 1px solid transparent;
+  cursor: pointer; transition: all 0.12s;
+}
+.domain-chip:hover { background: #e4e6e9; }
+.domain-chip.active { background: var(--primary); color: #fff; }
+.domain-bar #customDomain { font-size: 13px; padding: 5px 10px; width: 180px; }
+.domain-hint { font-size: 12px; }
+
+/* 文章互动数据 */
+.metrics {
+  display: flex; gap: 14px; margin-top: 8px;
+  font-size: 12px; color: var(--muted);
+}
+.metrics span { display: inline-flex; align-items: center; gap: 3px; }
+
 .layout {
   display: grid;
   grid-template-columns: 360px 1fr;

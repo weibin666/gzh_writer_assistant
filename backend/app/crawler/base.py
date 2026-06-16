@@ -25,6 +25,11 @@ class RawPost:
     keyword: str = ""
     source: str = ""
     hotness: float = 0.0
+    # 互动数据；-1 表示数据源无法提供
+    likes: int = -1
+    shares: int = -1
+    favorites: int = -1
+    comments: int = -1
     published_at: Optional[datetime] = None
     extra: dict = field(default_factory=dict)
 
